@@ -492,6 +492,20 @@ select {
   padding: 7px 10px;
   max-width: 260px;
 }
+.key-btn {
+  font: inherit;
+  min-width: 120px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 9px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.key-btn:hover { border-color: rgba(255,255,255,0.35); }
+.key-btn.capturing { border-color: var(--gold); color: var(--gold); }
+.key-reset { display: flex; justify-content: flex-end; margin: -4px 0 12px; }
 .dialog-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
 .btn-primary { background: var(--gold); color: #1b1405; border: 0; padding: 10px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
@@ -526,4 +540,5 @@ select {
   table.chart td { min-width: 0; height: 24px; }
   .field { flex-direction: column; align-items: stretch; gap: 4px; }
   select { max-width: none; }
+  .key-btn { min-width: 0; }
 }

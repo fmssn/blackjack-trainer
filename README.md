@@ -21,7 +21,9 @@ All rules are configurable in the settings (presets for "double on any two" and 
 - **Drill**: flashcard-style spots (hard, soft, pairs, or your weak spots)
 - **Chart**: the complete basic strategy chart for the current rules, with an overlay of your accuracy per cell
 - **Stats**: accuracy by category, EV given away, most missed spots (stored locally in your browser)
-- Keyboard: `H` hit, `S` stand, `D` double, `P` split, `Y`/`N` insurance, `Space` next hand
+- Keyboard, one-handed by default: `A` hit, `S` stand, `D` double, `F` split, `Q`/`W` insurance yes/no,
+  `Space` next hand. Every key can be rebound in Settings → Keyboard (bound by physical key position,
+  so the layout also works on QWERTZ/AZERTY).
 
 ## How the strategy is computed
 

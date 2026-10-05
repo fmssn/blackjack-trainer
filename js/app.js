@@ -5,6 +5,9 @@ import {
   Shoe, startRound, resolveInsurance, availableActions, analyzeActive, applyAction,
   dealerStep, settle, activeHand, handInfo, describeHand, isNatural,
 } from './game.js';
+import {
+  KEY_ACTIONS, keyLabel, normalizeKeys, actionForCode, rebind, RESERVED, DEFAULT_KEYS,
+} from './keys.js';
 
 /* ---------------- Persistence ---------------- */
 const store = {
@@ -29,6 +32,7 @@ const DEFAULT_OPTS = { feedback: 'always', onMistake: 'continue', speed: '300', 
 const settings = store.get('bjt.settings', null) || { rules: { ...DEFAULT_RULES }, opts: { ...DEFAULT_OPTS } };
 settings.rules = { ...DEFAULT_RULES, ...settings.rules };
 settings.opts = { ...DEFAULT_OPTS, ...settings.opts };
+settings.keys = normalizeKeys(settings.keys);
 
 const freshStats = () => ({
   decisions: 0, correct: 0, streak: 0, bestStreak: 0, evLost: 0,
@@ -720,20 +724,69 @@ $('#resetStats').addEventListener('click', () => {
   renderStats();
 });
 
+/* ---------------- Keyboard ---------------- */
+let capturing = null; // action id waiting for a new key
+
+function renderKeyLabels() {
+  $$('[data-key-for]').forEach((k) => { k.textContent = keyLabel(settings.keys[k.dataset.keyFor]); });
+}
+
+function renderKeyBinds() {
+  $('#keyBinds').innerHTML = KEY_ACTIONS.map(({ id, label }) => `
+    <div class="field"><span>${label}</span>
+      <button type="button" class="key-btn${capturing === id ? ' capturing' : ''}" data-bind="${id}">${capturing === id ? 'Press a key…' : keyLabel(settings.keys[id])}</button>
+    </div>`).join('');
+}
+
+function setKeys(keys) {
+  settings.keys = keys;
+  saveSettings();
+  renderKeyLabels();
+  renderKeyBinds();
+}
+
+$('#keyBinds').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-bind]');
+  if (!b) return;
+  capturing = capturing === b.dataset.bind ? null : b.dataset.bind;
+  renderKeyBinds();
+});
+$('#resetKeys').addEventListener('click', () => { capturing = null; setKeys({ ...DEFAULT_KEYS }); });
+el.dialog.addEventListener('cancel', (e) => {
+  // Esc while rebinding cancels the rebind, not the dialog.
+  if (capturing) { e.preventDefault(); capturing = null; renderKeyBinds(); }
+});
+el.dialog.addEventListener('close', () => { capturing = null; });
+
 document.addEventListener('keydown', (e) => {
+  if (capturing) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const action = capturing;
+    capturing = null;
+    if (e.code === 'Escape' || RESERVED.has(e.code) || !e.code) renderKeyBinds();
+    else setKeys(rebind(settings.keys, action, e.code));
+    return;
+  }
   if (e.metaKey || e.ctrlKey || e.altKey || el.dialog.open) return;
   if (mode !== 'play' && mode !== 'drill') return;
-  const k = e.key.toLowerCase();
-  const map = { h: 'hit', s: 'stand', d: 'double', p: 'split' };
-  if (map[k]) { onAction(map[k]); e.preventDefault(); return; }
-  if (k === 'y') { onInsurance(true); return; }
-  if (k === 'n') { onInsurance(false); return; }
-  if (k === ' ' || k === 'enter') {
-    if (!el.nextActions.hidden && !busy) { e.preventDefault(); newHand(); }
-    else if (k === ' ') e.preventDefault();
+  if (e.target.closest?.('input, select, textarea')) return;
+  const action = actionForCode(settings.keys, e.code);
+  if (action === 'hit' || action === 'stand' || action === 'double' || action === 'split') {
+    e.preventDefault();
+    onAction(action);
+  } else if (action === 'insYes' || action === 'insNo') {
+    e.preventDefault();
+    onInsurance(action === 'insYes');
+  } else if (action === 'next' || e.code === 'Enter' || e.code === 'NumpadEnter') {
+    e.preventDefault();
+    if (!el.nextActions.hidden && !busy) newHand();
   }
 });
 
 /* ---------------- Boot ---------------- */
 updateRulesText();
+renderKeyLabels();
+renderKeyBinds();
 setMode('play');
