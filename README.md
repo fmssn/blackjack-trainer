@@ -38,6 +38,6 @@ python3 -m http.server   # then open http://localhost:8000
 npm test                 # strategy + game logic tests (Node 20+)
 ```
 
-Deployed to GitHub Pages by `.github/workflows/pages.yml` on every push to the default branch.
+Deployed to GitHub Pages by `.github/workflows/pages.yml` on every push to `main`.
 
 Remember: the house always wins in the long run. This is for fun.
