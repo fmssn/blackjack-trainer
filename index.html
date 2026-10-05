@@ -73,18 +73,18 @@
 
         <div class="controls" id="controls">
           <div class="actions" id="actions">
-            <button class="act act-hit" data-action="hit"><span>Hit</span><kbd>H</kbd></button>
-            <button class="act act-stand" data-action="stand"><span>Stand</span><kbd>S</kbd></button>
-            <button class="act act-double" data-action="double"><span>Double</span><kbd>D</kbd></button>
-            <button class="act act-split" data-action="split"><span>Split</span><kbd>P</kbd></button>
+            <button class="act act-hit" data-action="hit"><span>Hit</span><kbd data-key-for="hit"></kbd></button>
+            <button class="act act-stand" data-action="stand"><span>Stand</span><kbd data-key-for="stand"></kbd></button>
+            <button class="act act-double" data-action="double"><span>Double</span><kbd data-key-for="double"></kbd></button>
+            <button class="act act-split" data-action="split"><span>Split</span><kbd data-key-for="split"></kbd></button>
           </div>
           <div class="actions" id="insActions" hidden>
             <p class="ins-q" id="insQuestion">Insurance?</p>
-            <button class="act act-yes" data-ins="yes"><span>Yes</span><kbd>Y</kbd></button>
-            <button class="act act-no" data-ins="no"><span>No</span><kbd>N</kbd></button>
+            <button class="act act-yes" data-ins="yes"><span>Yes</span><kbd data-key-for="insYes"></kbd></button>
+            <button class="act act-no" data-ins="no"><span>No</span><kbd data-key-for="insNo"></kbd></button>
           </div>
           <div class="actions" id="nextActions" hidden>
-            <button class="act act-next" id="nextBtn"><span>Next hand</span><kbd>Space</kbd></button>
+            <button class="act act-next" id="nextBtn"><span>Next hand</span><kbd data-key-for="next"></kbd></button>
           </div>
         </div>
 
@@ -92,7 +92,7 @@
           <div class="fb-empty" id="fbEmpty">
             <h2>How it works</h2>
             <p>Play hands as you would at the table. Every decision is checked against the mathematically optimal move for the current rules, and you see the expected value of each option.</p>
-            <p class="muted">Keys: <kbd>H</kbd> hit · <kbd>S</kbd> stand · <kbd>D</kbd> double · <kbd>P</kbd> split · <kbd>Space</kbd> next</p>
+            <p class="muted">Keys: <kbd data-key-for="hit"></kbd> hit · <kbd data-key-for="stand"></kbd> stand · <kbd data-key-for="double"></kbd> double · <kbd data-key-for="split"></kbd> split · <kbd data-key-for="next"></kbd> next. Change them in Settings.</p>
           </div>
           <div id="fbBody" hidden></div>
         </aside>
@@ -168,6 +168,10 @@
         <label class="field"><span>Auto-deal next hand</span>
           <select data-opt="autoDeal"><option value="false">Off</option><option value="true">On</option></select></label>
       </fieldset>
+      <h2>Keyboard</h2>
+      <p class="muted small">Defaults sit under your left hand. Click a key, then press the new one (Esc cancels).</p>
+      <fieldset id="keyBinds"></fieldset>
+      <div class="key-reset"><button type="button" class="btn-ghost" id="resetKeys">Reset to defaults</button></div>
       <p class="muted small">The shoe is a 6-deck automatic shuffler: every round starts from a full shoe, so card counting is pointless. Strategy is computed exactly (infinite-deck EVs) for the rules above.</p>
       <div class="dialog-actions">
         <button value="close" class="btn-primary">Done</button>
