@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Blackjack Trainer</title>
+  <meta name="description" content="Train perfect basic strategy for German casino blackjack: no hole card, automatic shuffler, dealer stands on soft 17.">
+  <meta name="theme-color" content="#0b3d2a">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🂡</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">♠</span>
+      <div>
+        <h1>Blackjack Trainer</h1>
+        <p class="rules-line" id="rulesLine"></p>
+      </div>
+    </div>
+    <nav class="modes" role="tablist" aria-label="Mode">
+      <button role="tab" data-mode="play" aria-selected="true">Play</button>
+      <button role="tab" data-mode="drill" aria-selected="false">Drill</button>
+      <button role="tab" data-mode="chart" aria-selected="false">Chart</button>
+      <button role="tab" data-mode="stats" aria-selected="false">Stats</button>
+    </nav>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" transform="translate(-1 0)"/></svg>
+    </button>
+  </header>
+
+  <div class="scorebar" aria-live="polite">
+    <div class="score"><span class="score-label">Accuracy</span><span class="score-val" id="sAcc">–</span></div>
+    <div class="score"><span class="score-label">Decisions</span><span class="score-val" id="sDec">0</span></div>
+    <div class="score"><span class="score-label">Streak</span><span class="score-val" id="sStreak">0</span></div>
+    <div class="score"><span class="score-label">EV lost</span><span class="score-val" id="sEvLost">0.00</span></div>
+    <div class="score" id="bankBox"><span class="score-label">Bankroll</span><span class="score-val" id="sBank">1000</span></div>
+  </div>
+
+  <main>
+    <!-- Table (play + drill) -->
+    <section id="tableView" class="view">
+      <div class="layout">
+        <div class="felt" id="felt">
+          <div class="drill-picker" id="drillPicker" hidden>
+            <span class="drill-label">Practice:</span>
+            <div class="seg" role="radiogroup" aria-label="Drill focus">
+              <button data-drill="all" aria-pressed="true">All</button>
+              <button data-drill="hard" aria-pressed="false">Hard</button>
+              <button data-drill="soft" aria-pressed="false">Soft</button>
+              <button data-drill="pairs" aria-pressed="false">Pairs</button>
+              <button data-drill="weak" aria-pressed="false">Weak spots</button>
+            </div>
+          </div>
+          <div class="zone dealer-zone">
+            <div class="zone-label">Dealer <span class="total" id="dealerTotal"></span></div>
+            <div class="cards" id="dealerCards"></div>
+          </div>
+          <div class="felt-mid">
+            <div class="felt-print" aria-hidden="true">
+              <span>BLACKJACK PAYS 3 TO 2</span>
+              <small id="feltRules">Dealer stands on all 17s · Insurance pays 2 to 1</small>
+            </div>
+            <div class="banner" id="banner" hidden></div>
+          </div>
+          <div class="zone player-zone">
+            <div class="hands" id="playerHands"></div>
+          </div>
+        </div>
+
+        <div class="controls" id="controls">
+          <div class="actions" id="actions">
+            <button class="act act-hit" data-action="hit"><span>Hit</span><kbd>H</kbd></button>
+            <button class="act act-stand" data-action="stand"><span>Stand</span><kbd>S</kbd></button>
+            <button class="act act-double" data-action="double"><span>Double</span><kbd>D</kbd></button>
+            <button class="act act-split" data-action="split"><span>Split</span><kbd>P</kbd></button>
+          </div>
+          <div class="actions" id="insActions" hidden>
+            <p class="ins-q" id="insQuestion">Insurance?</p>
+            <button class="act act-yes" data-ins="yes"><span>Yes</span><kbd>Y</kbd></button>
+            <button class="act act-no" data-ins="no"><span>No</span><kbd>N</kbd></button>
+          </div>
+          <div class="actions" id="nextActions" hidden>
+            <button class="act act-next" id="nextBtn"><span>Next hand</span><kbd>Space</kbd></button>
+          </div>
+        </div>
+
+        <aside class="feedback" id="feedback" aria-live="polite">
+          <div class="fb-empty" id="fbEmpty">
+            <h2>How it works</h2>
+            <p>Play hands as you would at the table. Every decision is checked against the mathematically optimal move for the current rules, and you see the expected value of each option.</p>
+            <p class="muted">Keys: <kbd>H</kbd> hit · <kbd>S</kbd> stand · <kbd>D</kbd> double · <kbd>P</kbd> split · <kbd>Space</kbd> next</p>
+          </div>
+          <div id="fbBody" hidden></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Chart -->
+    <section id="chartView" class="view" hidden>
+      <div class="chart-head">
+        <div>
+          <h2>Basic strategy for your rules</h2>
+          <p class="muted" id="chartRules"></p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="overlayToggle">
+          <span>Show my mistakes</span>
+        </label>
+      </div>
+      <div class="legend">
+        <span class="lg c-H">H</span> Hit
+        <span class="lg c-S">S</span> Stand
+        <span class="lg c-D">D</span> Double, else hit
+        <span class="lg c-Ds">Ds</span> Double, else stand
+        <span class="lg c-P">P</span> Split
+      </div>
+      <div class="charts" id="charts"></div>
+      <div class="cell-detail" id="cellDetail" hidden></div>
+    </section>
+
+    <!-- Stats -->
+    <section id="statsView" class="view" hidden>
+      <div class="stats-grid" id="statsGrid"></div>
+      <h3>Most missed spots</h3>
+      <div id="missList"></div>
+      <button class="btn-ghost danger" id="resetStats">Reset all stats</button>
+    </section>
+  </main>
+
+  <dialog id="settings">
+    <form method="dialog" class="settings-form">
+      <h2>Table rules</h2>
+      <label class="field">
+        <span>Preset</span>
+        <select id="preset">
+          <option value="de">German casino (standard)</option>
+          <option value="de-any">German casino, double on any two</option>
+          <option value="us">US style (hole card, double any)</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+      <fieldset>
+        <label class="field"><span>Dealer on soft 17</span>
+          <select data-rule="h17"><option value="false">Stands (S17)</option><option value="true">Hits (H17)</option></select></label>
+        <label class="field"><span>Dealer hole card</span>
+          <select data-rule="holeCard"><option value="false">No hole card (European)</option><option value="true">Hole card + peek (US)</option></select></label>
+        <label class="field"><span>Dealer blackjack takes</span>
+          <select data-rule="obo"><option value="false">All bets (doubles & splits too)</option><option value="true">Original bet only</option></select></label>
+        <label class="field"><span>Double down on</span>
+          <select data-rule="double"><option value="9-11">Hard 9, 10, 11</option><option value="10-11">Hard 10, 11</option><option value="any">Any two cards</option></select></label>
+        <label class="field"><span>Double after split</span>
+          <select data-rule="das"><option value="true">Allowed</option><option value="false">Not allowed</option></select></label>
+        <label class="field"><span>Max hands (resplit)</span>
+          <select data-rule="maxHands"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
+      </fieldset>
+      <h2>Trainer</h2>
+      <fieldset>
+        <label class="field"><span>Show feedback</span>
+          <select data-opt="feedback"><option value="always">After every decision</option><option value="mistakes">Only on mistakes</option></select></label>
+        <label class="field"><span>On a mistake</span>
+          <select data-opt="onMistake"><option value="continue">Play my move anyway</option><option value="retry">Make me pick again</option></select></label>
+        <label class="field"><span>Dealer speed</span>
+          <select data-opt="speed"><option value="550">Relaxed</option><option value="300">Normal</option><option value="120">Fast</option></select></label>
+        <label class="field"><span>Auto-deal next hand</span>
+          <select data-opt="autoDeal"><option value="false">Off</option><option value="true">On</option></select></label>
+      </fieldset>
+      <p class="muted small">The shoe is a 6-deck automatic shuffler: every round starts from a full shoe, so card counting is pointless. Strategy is computed exactly (infinite-deck EVs) for the rules above.</p>
+      <div class="dialog-actions">
+        <button value="close" class="btn-primary">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
